@@ -6,6 +6,11 @@ import {
   addDoc,
   deleteDoc,
   doc,
+  query,
+  orderBy,
+  serverTimestamp,
+  getDoc,
+  updateDoc,
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -26,8 +31,11 @@ const db = getFirestore();
 // collection ref
 const colRef = collection(db, "books");
 
+// queries
+const q = query(colRef, orderBy("createdAt"));
+
 //  real time collection data
-onSnapshot(colRef, (snapshot) => {
+onSnapshot(q, (snapshot) => {
   let books = [];
   snapshot.docs.forEach((doc) => {
     books.push({ ...doc.data(), id: doc.id });
@@ -42,6 +50,7 @@ addBookForm.addEventListener("submit", (e) => {
   addDoc(colRef, {
     title: addBookForm.title.value,
     author: addBookForm.author.value,
+    createdAt: serverTimestamp(),
   }).then(() => {
     addBookForm.reset();
   });
@@ -55,5 +64,23 @@ deleteBookForm.addEventListener("submit", (e) => {
   const docRef = doc(db, "books", deleteBookForm.id.value);
   deleteDoc(docRef).then(() => {
     deleteBookForm.reset();
+  });
+});
+
+// get a single document
+const docRef = doc(db, "books", "ZUAN0aygZuxMj6s74uL1");
+onSnapshot(docRef, (doc) => {
+  console.log(doc.data(), doc.id);
+});
+
+// updating a document
+const updateBookForm = document.querySelector(".update");
+updateBookForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const update = doc(db, "books", updateBookForm.id.value);
+  updateDoc(update, {
+    title: "Citizen's wishes to the Leader",
+  }).then(() => {
+    updateBookForm.reset();
   });
 });

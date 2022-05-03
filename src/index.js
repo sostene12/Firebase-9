@@ -12,6 +12,12 @@ import {
   getDoc,
   updateDoc,
 } from "firebase/firestore";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signOut,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNzXo2p4KtNSbApZu2vk3R2z8SI1zlm9I",
@@ -27,6 +33,7 @@ initializeApp(firebaseConfig);
 
 // init serveices
 const db = getFirestore();
+const auth = getAuth();
 
 // collection ref
 const colRef = collection(db, "books");
@@ -83,4 +90,47 @@ updateBookForm.addEventListener("submit", (e) => {
   }).then(() => {
     updateBookForm.reset();
   });
+});
+
+// signup
+const signupForm = document.querySelector(".signup");
+signupForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const email = signupForm.email.value;
+  const password = signupForm.password.value;
+  createUserWithEmailAndPassword(auth, email, password)
+    .then((cred) => {
+      console.log(cred.user);
+      signupForm.reset();
+    })
+    .catch((error) => {
+      console.log(error.message);
+    });
+});
+
+// login and logout
+const logoutButton = document.querySelector(".logout");
+logoutButton.addEventListener("click", () => {
+  signOut(auth)
+    .then(() => {
+      console.log("The user signed out.");
+    })
+    .catch((error) => {
+      console.log(error.message);
+    });
+});
+
+const loginForm = document.querySelector(".login");
+loginForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const email = loginForm.email.value;
+  const password = loginForm.password.value;
+  signInWithEmailAndPassword(auth, email, password)
+    .then((cred) => {
+      console.log("signed User:", cred.user);
+      loginForm.reset();
+    })
+    .catch((error) => {
+      console.log(error.message);
+    });
 });
